@@ -51,7 +51,7 @@ class Nave(pygame.sprite.Sprite):
     def __init__(self, x: int, y: int, saude: int) -> None:
         super().__init__()
         # Carrega a imagem da nave com transparência e a redimensiona
-        self.image = pygame.image.load('img/principal.png').convert_alpha()
+        self.image = pygame.image.load(os.path.join(diretorio_atual, 'img', 'principal.png'))
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect(centerx=x, centery=y)
         self.mask = pygame.mask.from_surface(self.image)
@@ -120,12 +120,12 @@ class Nave(pygame.sprite.Sprite):
 # Define a classe Planeta, que herda da classe pygame.sprite.Sprite
 
 
+
 class Planeta(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe a saúde do planeta
     def __init__(self, saude: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(
-            'img/planeta.png')  # Carrega a imagem do planeta
+        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'planeta.png'))  # Carrega a imagem do planeta
         self.image = pygame.transform.scale(self.image, (600, 300))
         # Obtém o retângulo da imagem do planeta
         self.rect: pygame.Rect = self.image.get_rect()
@@ -168,8 +168,7 @@ class Balas(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe coordenadas x e y
     def __init__(self, x: int, y: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(
-            'img/bullet.png')  # Carrega a imagem da bala
+        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'bullet.png'))  
         # Obtém o retângulo da imagem da bala
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.center = [x, y]  # Define a posição inicial da bala
@@ -198,8 +197,8 @@ class Navesviloes(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe coordenadas x e y
     def __init__(self, x: int, y: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(
-            'img/vilao' + str(random.randint(1, 5)) + '.png')
+        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'vilao' + str(random.randint(1, 5)) + '.png'))
+        #pygame.image.load('vilao' + str(random.randint(1, 5)) + '.png')
         self.image = pygame.transform.scale(self.image, (50, 50))
         # Obtém o retângulo da imagem do vilão
         self.rect: pygame.Rect = self.image.get_rect()
@@ -218,8 +217,7 @@ class Naves_viloes_balas(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe coordenadas x e y
     def __init__(self, x: int, y: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(
-            'img/alien_bullet.png')  # Carrega a imagem do projétil do inimigo
+        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'alien_bullet.png')) 
         # Obtém o retângulo da imagem do projétil
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.center = [x, y]  # Define a posição inicial do projétil
@@ -247,7 +245,7 @@ class Explosoes(pygame.sprite.Sprite):
         self.images = []  # Lista para armazenar as imagens da explosão
         for num in range(1, 6):  # Loop para carregar as cinco imagens de explosão
             # Carrega a imagem de explosão correspondente
-            img = pygame.image.load(f'img/exp{num}.png')
+            img = pygame.image.load(os.path.join(diretorio_atual, 'img', f'exp{num}.png'))
             if tamanho == 1:  # Verifica o tamanho da explosão
                 # Redimensiona a imagem para 20x20 pixels
                 img = pygame.transform.scale(img, (20, 20))
@@ -282,7 +280,7 @@ class Explosoes(pygame.sprite.Sprite):
         if self.index >= len(self.images):
             self.kill()  # Remove a explosão do jogo
 
-
+diretorio_atual = os.path.dirname(__file__)
 nave_grupo = pygame.sprite.Group()  # Grupo para a nave do jogador
 balas_grupo = pygame.sprite.Group()  # Grupo para as balas do jogador
 navesviloes_grupo = pygame.sprite.Group()  # Grupo para os vilões
@@ -323,18 +321,17 @@ while run:  # Loop principal do jogo
     if menu == True:
         son_menu.play()
 
-        img_logo = pygame.image.load('img/logo.png')
+        img_logo = pygame.image.load(os.path.join(diretorio_atual, 'img', 'logo.png'))
         img_logo = pygame.transform.scale(img_logo, (370, 200))
         display.blit(img_logo, (100, 100))
 
-        img_ranking = pygame.image.load('img/ranking.png')
+        img_ranking = pygame.image.load(os.path.join(diretorio_atual, 'img', 'ranking.png'))
         # diminuir escala dessa imagem
         img_ranking = pygame.transform.scale(img_ranking, (90, 90))
         display.blit(img_ranking, (90, 300))
 
         for idx, jogador in enumerate(melhores_jogadores):
-            draw_texto(f"{idx+1}. {jogador['nome']} - {jogador['pontos']
-                                                       } pontos", fonte15, branco, 200, 300 + 40 * idx)
+            draw_texto(f"{idx+1}. {jogador['nome']} - {jogador['pontos']} pontos", fonte15, branco, 200, 300 + 40 * idx)
         draw_texto("Usuario : ", fonte30, branco, 175, 455)  # aqui
         draw_texto("Senha : ", fonte30, branco, 197, 505)  # aqui
         pygame.draw.rect(display, cor, senha_rect, 2)
@@ -469,8 +466,7 @@ while run:  # Loop principal do jogo
 
                     draw_texto('GAME OVER: TERRA INVADIDA!', fonte15, (255, 255, 255), int(
                         largura / 2 - 100), int(altura / 2 - 50))
-                    draw_texto(f'SUA POSIÇÃO NO RANKING  : {
-                               posicao_ranking}', fonte15, (255, 255, 255), int(largura / 2 - 100), int(altura / 2))
+                    draw_texto(f'SUA POSIÇÃO NO RANKING  : {posicao_ranking}', fonte15, (255, 255, 255), int(largura / 2 - 100), int(altura / 2))
                     if botao_resetar.draw():
                         # Acumula pontos ao reiniciar o jogo
                         game_over = 0
