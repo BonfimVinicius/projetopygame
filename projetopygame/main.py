@@ -1,6 +1,6 @@
 from variaveis import *
 from banco_dados import *
-
+import json
 
 def resetar_game():
     global pontos, contagem
@@ -46,16 +46,15 @@ class Botao:
 
 
 # classes
-
 class Nave(pygame.sprite.Sprite):
     def __init__(self, x: int, y: int, saude: int) -> None:
         super().__init__()
         # Carrega a imagem da nave com transparência e a redimensiona
-        self.image = pygame.image.load(os.path.join(diretorio_atual, 'img', 'principal.png'))
+        self.image = pygame.image.load('img/principal.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect(centerx=x, centery=y)
-        self.mask = pygame.mask.from_surface(self.image)
-        self.saude_incial = saude
+        self.mask: pygame.mask.Mask = pygame.mask.from_surface(self.image)
+        self.saude_inicial = saude
         self.saude_restante = saude
         self.ultimo_tiro = pygame.time.get_ticks()
 
@@ -89,43 +88,46 @@ class Nave(pygame.sprite.Sprite):
         # Define a máscara de colisão da nave
         self.mask = pygame.mask.from_surface(self.image)
 
-        # Verifica colisão com a planeta
-
-        if pygame.sprite.spritecollide(self, planeta_grupo, False, pygame.sprite.collide_mask):
-                self.rect.center = [self.rect.centerx, self.rect.centery]
-
+        # Verifica colisão com inimigos
+        if self.saude_restante <= 0:
+            explosao = Explosoes(self.rect.centerx, self.rect.centery, 1)
+            explosao_grupo.add(explosao) 
+            self.kill()
+            game_over = -1  # Define que o jogo acabou
+        
         # Verifica colisão com inimigos
         if pygame.sprite.spritecollide(self, navesviloes_grupo, False, pygame.sprite.collide_mask):
-            explosao = Explosoes(self.rect.centerx, self.rect.centery, 1)
-            explosao_grupo.add(explosao)
-            self.kill()
-            game_over = -1
+            explosao = Explosoes(self.rect.centerx, self.rect.centery, 1)  # Cria uma explosão
+            explosao_grupo.add(explosao)  # Adiciona a explosão ao grupo de explosões
+            self.kill()  # Remove a nave
+            game_over = -1  # Define que o jogo acabou
+
+      
 
         return game_over
-
+    
     def desenho_barrasaude(self) -> None:
         # Desenha a barra de saúde
         # Desenha o fundo azul escuro da barra de saúde
         pygame.draw.rect(display, (53, 115, 255), (10, altura - 50, 100, 15))
         if self.saude_restante > 0:
             # Calcula o comprimento proporcional da barra de saúde
-            largura_saude = int(
-                100 * (self.saude_restante / self.saude_incial))
+            largura_saude = (
+                100 * (self.saude_restante / self.saude_inicial))
             # Desenha a barra de saúde azul claro proporcional à saúde restante
             pygame.draw.rect(display, (173, 216, 230),
                              (10, altura - 50, largura_saude, 15))
         # Desenha o texto "SAÚDE NAVE"
-        draw_texto('SAÚDE  NAVE', fonte15, branco, 7, altura - 30)
-
-# Define a classe Planeta, que herda da classe pygame.sprite.Sprite
-
-
-
+        draw_texto('SAÚDE NAVE', fonte15, branco, 7, altura - 30)
+        
+        
+        
 class Planeta(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe a saúde do planeta
     def __init__(self, saude: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'planeta.png'))  # Carrega a imagem do planeta
+        self.image: pygame.Surface = pygame.image.load(
+            'img/planeta.png')  # Carrega a imagem do planeta
         self.image = pygame.transform.scale(self.image, (600, 300))
         # Obtém o retângulo da imagem do planeta
         self.rect: pygame.Rect = self.image.get_rect()
@@ -168,7 +170,8 @@ class Balas(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe coordenadas x e y
     def __init__(self, x: int, y: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'bullet.png'))  
+        self.image: pygame.Surface = pygame.image.load(
+            'img/bullet.png')  # Carrega a imagem da bala
         # Obtém o retângulo da imagem da bala
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.center = [x, y]  # Define a posição inicial da bala
@@ -197,8 +200,8 @@ class Navesviloes(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe coordenadas x e y
     def __init__(self, x: int, y: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'vilao' + str(random.randint(1, 5)) + '.png'))
-        #pygame.image.load('vilao' + str(random.randint(1, 5)) + '.png')
+        self.image: pygame.Surface = pygame.image.load(
+            'img/vilao' + str(random.randint(1, 5)) + '.png')
         self.image = pygame.transform.scale(self.image, (50, 50))
         # Obtém o retângulo da imagem do vilão
         self.rect: pygame.Rect = self.image.get_rect()
@@ -217,7 +220,8 @@ class Naves_viloes_balas(pygame.sprite.Sprite):
     # Método de inicialização da classe, recebe coordenadas x e y
     def __init__(self, x: int, y: int) -> None:
         super().__init__()  # Inicializa a classe pai (Sprite)
-        self.image: pygame.Surface = pygame.image.load(os.path.join(diretorio_atual, 'img', 'alien_bullet.png')) 
+        self.image: pygame.Surface = pygame.image.load(
+            'img/alien_bullet.png')  # Carrega a imagem do projétil do inimigo
         # Obtém o retângulo da imagem do projétil
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.center = [x, y]  # Define a posição inicial do projétil
@@ -245,7 +249,7 @@ class Explosoes(pygame.sprite.Sprite):
         self.images = []  # Lista para armazenar as imagens da explosão
         for num in range(1, 6):  # Loop para carregar as cinco imagens de explosão
             # Carrega a imagem de explosão correspondente
-            img = pygame.image.load(os.path.join(diretorio_atual, 'img', f'exp{num}.png'))
+            img = pygame.image.load(f'img/exp{num}.png')
             if tamanho == 1:  # Verifica o tamanho da explosão
                 # Redimensiona a imagem para 20x20 pixels
                 img = pygame.transform.scale(img, (20, 20))
@@ -280,7 +284,7 @@ class Explosoes(pygame.sprite.Sprite):
         if self.index >= len(self.images):
             self.kill()  # Remove a explosão do jogo
 
-diretorio_atual = os.path.dirname(__file__)
+
 nave_grupo = pygame.sprite.Group()  # Grupo para a nave do jogador
 balas_grupo = pygame.sprite.Group()  # Grupo para as balas do jogador
 navesviloes_grupo = pygame.sprite.Group()  # Grupo para os vilões
@@ -302,12 +306,54 @@ botao_voltar = Botao(largura // 2 + 100, altura // 2 + 200, voltar_img)
 
 # Criar a nave do jogador e adicioná-la ao grupo de naves do jogador
 # Cria uma instância da classe Nave
-nave = Nave(int(largura / 2), altura - 100, 5)
+nave = Nave(int(largura / 2), (altura - 100), 5)
 nave_grupo.add(nave)  # Adiciona a nave ao grupo de naves do jogador
 
 run = True  # Variável de controle do loop principal do jogo
 # retangulo caixa texto
+
+
+
+
+
+nome_arquivo = "dados_jogo.json"
+
+# Tenta carregar os dados existentes do arquivo, se houver
+try:
+    with open(nome_arquivo, "r") as file:
+        dados_existentes = json.load(file)
+except FileNotFoundError:
+    dados_existentes = {"jogadores": []}
+
+# Função para verificar se o nome de usuário existe na lista de jogadores
+def verificar_usuario(nome_usuario, dados_existentes):
+    for jogador in dados_existentes["jogadores"]:
+        if isinstance(jogador, dict) and jogador.get("nome") == nome_usuario:
+            return True
+    return False
+
+# Verifica se todos os itens em dados_existentes["jogadores"] são dicionários com a chave "pontos"
+jogadores_validos = [jogador for jogador in dados_existentes["jogadores"] if isinstance(jogador, dict) and "pontos" in jogador]
+
+# Ordena os jogadores válidos por pontos em ordem decrescente
+jogadores_ordenados = sorted(jogadores_validos, key=lambda x: x["pontos"], reverse=True)
+
+# Seleciona os 3 melhores jogadores
+melhores_jogadores = jogadores_ordenados[:3]
+
+
+
+
+def obter_posicao_ranking(nome_usuario, jogadores_ordenados):
+    for idx, jogador in enumerate(jogadores_ordenados):
+        if jogador["nome"] == nome_usuario:
+            return idx + 1
+    return 25
+
+
+
 while run:  # Loop principal do jogo
+    relogio.tick(60)
     # Desenha o fundo em loop, deslocando-o verticalmente
     for i in range(0, tiles):
         display.blit(bg, (0, i * bg_altura + rolagem))
@@ -321,17 +367,18 @@ while run:  # Loop principal do jogo
     if menu == True:
         son_menu.play()
 
-        img_logo = pygame.image.load(os.path.join(diretorio_atual, 'img', 'logo.png'))
+        img_logo = pygame.image.load('img/logo.png')
         img_logo = pygame.transform.scale(img_logo, (370, 200))
         display.blit(img_logo, (100, 100))
 
-        img_ranking = pygame.image.load(os.path.join(diretorio_atual, 'img', 'ranking.png'))
+        img_ranking = pygame.image.load('img/ranking.png')
         # diminuir escala dessa imagem
         img_ranking = pygame.transform.scale(img_ranking, (90, 90))
         display.blit(img_ranking, (90, 300))
 
         for idx, jogador in enumerate(melhores_jogadores):
-            draw_texto(f"{idx+1}. {jogador['nome']} - {jogador['pontos']} pontos", fonte15, branco, 200, 300 + 40 * idx)
+            draw_texto(f"{idx+1}. {jogador['nome']} - {jogador['pontos']
+                                                       } pontos", fonte15, branco, 200, 300 + 40 * idx)
         draw_texto("Usuario : ", fonte30, branco, 175, 455)  # aqui
         draw_texto("Senha : ", fonte30, branco, 197, 505)  # aqui
         pygame.draw.rect(display, cor, senha_rect, 2)
@@ -390,14 +437,17 @@ while run:  # Loop principal do jogo
                 tempo_atual = pygame.time.get_ticks()
 
                 # Ajusta a dificuldade com base nos inimigos eliminados
-                if inimigos_eliminados > 5:
-                    alien_cooldown = 1500  # Reduz o tempo entre aparições dos inimigos
-                if inimigos_eliminados > 10:
-                    alien_cooldown = 800
-                if inimigos_eliminados > 15:
+                if pontos > 800:
+                    alien_cooldown = 600  # Reduz o tempo entre aparições dos inimigos
+                if pontos > 600:
                     alien_cooldown = 700
-                if inimigos_eliminados > 20:
-                    alien_cooldown = 600
+                if pontos > 400:
+                    alien_cooldown = 800
+                if pontos > 200:
+                    alien_cooldown = 900
+                else:
+                    alien_cooldown = 1000
+                
 
                 # Adiciona um novo vilão em intervalos regulares
                 # Adiciona um novo vilão em intervalos regulares
@@ -434,11 +484,6 @@ while run:  # Loop principal do jogo
                 if game_over == - 1:  # Se o jogador perdeu
                     posicao_ranking = obter_posicao_ranking(
                         nome_usuario, jogadores_ordenados)
-
-            # Atualizar dados do jogador
-
-            # Salvar os dados do jogador
-
                     draw_texto('GAME OVER : NAVE DESTRUIDA!', fonte15, branco, int(
                         # Exibe a mensagem de "GAME OVER!"
                         largura / 2 - 100), int(altura / 2 - 50))
@@ -449,6 +494,7 @@ while run:  # Loop principal do jogo
                         pontos_atuais = pontos  # Salva os pontos atuais
                         pontos, nave, planeta, contagem, alien = resetar_game()
                         pontos += pontos_atuais  # Adiciona os pontos atuais aos pontos reiniciados
+                        pontos = atualizar_pontos(pontos, pontos_atuais)  # Atualiza pontos sem permitir negativos
 
                     if botao_voltar.draw():
                         son_jogo.stop()
@@ -457,7 +503,8 @@ while run:  # Loop principal do jogo
                         game_over = 0
                         pontos_atuais = pontos  # Salva os pontos atuais
                         pontos, nave, planeta, contagem, alien = resetar_game()
-                        pontos += pontos_atuais  # Adiciona os pontos atuais aos pontos reiniciados
+                      # Adiciona os pontos atuais aos pontos reiniciados
+                        pontos = atualizar_pontos(pontos, pontos_atuais)  # Atualiza pontos sem permitir negativos
 
                 if game_over == - 2:  # Se o jogador perdeu
 
@@ -466,13 +513,14 @@ while run:  # Loop principal do jogo
 
                     draw_texto('GAME OVER: TERRA INVADIDA!', fonte15, (255, 255, 255), int(
                         largura / 2 - 100), int(altura / 2 - 50))
-                    draw_texto(f'SUA POSIÇÃO NO RANKING  : {posicao_ranking}', fonte15, (255, 255, 255), int(largura / 2 - 100), int(altura / 2))
+                    draw_texto(f'SUA POSIÇÃO NO RANKING  : {
+                               posicao_ranking}', fonte15, (255, 255, 255), int(largura / 2 - 100), int(altura / 2))
                     if botao_resetar.draw():
                         # Acumula pontos ao reiniciar o jogo
                         game_over = 0
                         pontos_atuais = pontos  # Salva os pontos atuais
                         pontos, nave, planeta, contagem, alien = resetar_game()
-                        pontos += pontos_atuais  # Adiciona os pontos atuais aos pontos reiniciados
+                        pontos = atualizar_pontos(pontos, pontos_atuais)  # Atualiza pontos sem permitir negativos
 
                     if botao_voltar.draw():
                         son_jogo.stop()
@@ -482,7 +530,7 @@ while run:  # Loop principal do jogo
                         game_over = 0
                         pontos_atuais = pontos  # Salva os pontos atuais
                         pontos, nave, planeta, contagem, alien = resetar_game()
-                        pontos += pontos_atuais  # Adiciona os pontos atuais aos pontos reiniciados
+                        pontos = atualizar_pontos(pontos, pontos_atuais)  # Atualiza pontos sem permitir negativos
 
             # Se ainda há contagem regressiva
             if contagem > 0:
@@ -557,3 +605,32 @@ while run:  # Loop principal do jogo
 
     # fecha o pygame
 pygame.quit()
+
+dados_jogo = {
+    "nome": nome_usuario,
+    "pontos": pontos,
+    "senha": senha
+}
+
+
+if novo_jogador:
+    dados_existentes["jogadores"].append(dados_jogo)
+else:
+    for jogador in dados_existentes["jogadores"]:
+        if isinstance(jogador, dict) and jogador.get("nome") == nome_usuario:
+            jogador["pontos"] = pontos
+            jogador["senha"] = senha
+
+with open(nome_arquivo, "w") as file:
+    json.dump(dados_existentes, file, indent=2)
+
+print("Dados do jogo atualizados:")
+print(json.dumps(dados_existentes, indent=2))
+
+# Atualiza os jogadores válidos e os melhores jogadores
+jogadores_validos = [jogador for jogador in dados_existentes["jogadores"] if isinstance(jogador, dict) and "pontos" in jogador]
+jogadores_ordenados = sorted(jogadores_validos, key=lambda x: x["pontos"], reverse=True)
+melhores_jogadores = jogadores_ordenados[:3]
+
+print("Top 3 jogadores:")
+print(json.dumps(melhores_jogadores, indent=2))
