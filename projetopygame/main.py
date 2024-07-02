@@ -1,5 +1,4 @@
 from variaveis import *
-from banco_dados import *
 import json
 
 def resetar_game():
@@ -313,9 +312,6 @@ run = True  # Variável de controle do loop principal do jogo
 # retangulo caixa texto
 
 
-
-
-
 nome_arquivo = "dados_jogo.json"
 
 # Tenta carregar os dados existentes do arquivo, se houver
@@ -342,13 +338,14 @@ jogadores_ordenados = sorted(jogadores_validos, key=lambda x: x["pontos"], rever
 melhores_jogadores = jogadores_ordenados[:3]
 
 
-
-
 def obter_posicao_ranking(nome_usuario, jogadores_ordenados):
     for idx, jogador in enumerate(jogadores_ordenados):
         if jogador["nome"] == nome_usuario:
             return idx + 1
-    return 25
+    return None
+
+
+
 
 
 
