@@ -16,10 +16,8 @@ pontos = 0
 velocidade_jogo = 10
 
 # fução escrever texto
-def atualizar_pontos(pontos, alteracao):
-    # Atualiza os pontos garantindo que não fiquem negativos
-    pontos += alteracao
-    return max(pontos, 0)
+
+
 
 
 # definir fontes:
@@ -74,7 +72,7 @@ branco = (255, 255, 255)
 
 
 # variáveis do jogo
-alien_cooldown = 1500
+alien_cooldown = 1000
 ultimo_tiro_alien = pygame.time.get_ticks()
 tempo_proximo_alien = pygame.time.get_ticks()
 contagem = 3  # 3 segundos para comecar o jogo
@@ -85,7 +83,7 @@ game_pause = False
 alien_cooldown = 1000  # Tempo inicial entre aparições de inimigos
 tempo_proximo_alien = 0
 ultimo_tiro_alien = 0
-pontos = 0
+inimigos_eliminados = 0
 # criacao da tela de fundo
 # Define a janela do jogo com as dimensões largura e altura
 display = pygame.display.set_mode((largura, altura))
